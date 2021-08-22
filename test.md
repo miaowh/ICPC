@@ -1,7 +1,12 @@
-#include <bits/stdc++.h>
-using namespace std;
-const int maxn = 1e6;
+精准覆盖
 
+十字链表
+
+行代表决策，列代表任务。
+
+重复覆盖
+```cpp
+const int maxn = 1e6;
 struct DLX {
     int L[maxn], R[maxn], U[maxn], D[maxn];
     int col[maxn], row[maxn];
@@ -69,3 +74,4 @@ struct DLX {
         return false;
     }
 } dlx;
+```

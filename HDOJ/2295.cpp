@@ -1,7 +1,11 @@
 #include <bits/stdc++.h>
 using namespace std;
-const int maxn = 1e6;
+using pdd = pair<double, double>;
+pdd cities[100], radios[100];
+const double eps = 1e-7;
+int n, m, k;
 
+const int maxn = 1e6;
 struct DLX {
     int L[maxn], R[maxn], U[maxn], D[maxn];
     int col[maxn], row[maxn];
@@ -50,7 +54,20 @@ struct DLX {
         }
     }
 
+    int cal() {
+        vector<bool> vis(m + 1);
+        int ret = 0;
+        for (int i = R[0]; i; i = R[i]) {
+            if (vis[i]) continue;
+            vis[i] = true;
+            ++ret;
+            for (int j = D[i]; j != i; j = D[j])
+                for (int v = R[j]; v != j; v = R[v]) vis[v] = true;
+        }
+        return ret;
+    }
     bool dance(int dep) {
+        if (dep + cal() > maxDep) return false;
         if (!R[0]) {
             maxDep = dep;
             return true;
@@ -69,3 +86,50 @@ struct DLX {
         return false;
     }
 } dlx;
+
+double len(const pdd &a, const pdd &b) {
+    return (a.first - b.first) * (a.first - b.first) +
+           (a.second - b.second) * (a.second - b.second);
+}
+bool ok(double r) {
+    vector<bool> vis[100];
+    for (int i = 0; i < n; i++) {
+        bool f = false;
+        for (int j = 0; j < m; j++) {
+            if (len(cities[i], radios[j]) <= r * r) {
+                f = true;
+                vis[j].push_back(true);
+            } else
+                vis[j].push_back(false);
+        }
+        if (!f) return false;
+    }
+    dlx.build(n);
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (vis[i][j]) dlx.insert(i, j + 1);
+        }
+    }
+    return dlx.dance(0);
+}
+int main() {
+    int T;
+    scanf("%d", &T);
+    while (T--) {
+        scanf("%d%d%d", &n, &m, &k);
+        for (int i = 0; i < n; i++)
+            scanf("%lf%lf", &cities[i].first, &cities[i].second);
+        for (int i = 0; i < m; i++)
+            scanf("%lf%lf", &radios[i].first, &radios[i].second);
+        double l = 0, r = 2000, ans = -1;
+        while (abs(r - l) > eps) {
+            double mid = (l + r) / 2;
+            if (ok(mid)) {
+                ans = mid;
+                r = l;
+            } else
+                l = r;
+        }
+        printf("%.6f\n", ans);
+    }
+}
