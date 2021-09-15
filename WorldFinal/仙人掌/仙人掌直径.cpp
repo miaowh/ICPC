@@ -20,17 +20,38 @@ void tarjan(int u, int fa) {
         } else if (v != fa)
             low[u] = min(low[u], dfn[v]);
         if (low[v] > dfn[u]) {
-            ans = dp[u] + dp[v] + 1;
+            ans = max(ans, dp[u] + dp[v] + 1);
             dp[u] = max(dp[u], dp[v] + 1);
         }
     }
 
     for (auto &v : G[u]) {
         if (par[v] != u && dfn[u] < dfn[v]) {
-            for (int i = v; i != u; i = par[i]) {
-                ans = max(ans, dp[u] + dp[i] +
-                                   min(dep[i] - dep[u], 1 + dep[v] - dep[i]));
+            vector<int> a;
+            for (int i = v;; i = par[i]) {
+                a.push_back(i);
+                if (i == u) break;
             }
+            int sz = a.size();
+            for (int i = v;; i = par[i]) {
+                a.push_back(i);
+                if (i == u) break;
+            }
+            reverse(a.begin(), a.end());
+
+            deque<int> dq;
+            for (int i = 0; i < a.size(); i++) {
+                while (!dq.empty() and (i - dq.front()) * 2 > sz)
+                    dq.pop_front();
+                if (!dq.empty())
+                    ans =
+                        max(ans, dp[a[i]] + dp[a[dq.front()]] + i - dq.front());
+                while (!dq.empty() and
+                       dp[a[i]] - i >= dp[a[dq.front()]] - dq.front())
+                    dq.pop_back();
+                dq.push_back(i);
+            }
+
             for (int i = v; i != u; i = par[i]) {
                 dp[u] = max(dp[u],
                             dp[i] + min(dep[i] - dep[u], 1 + dep[v] - dep[i]));
