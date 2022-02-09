@@ -3,6 +3,7 @@
         "ostream": "cpp",
         "vector": "cpp",
         "bitset": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "iostream": "cpp"
     }
 }
