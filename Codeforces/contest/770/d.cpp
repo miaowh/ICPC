@@ -25,6 +25,7 @@ int main() {
                 idx = i;
             }
         }
+
         int a = idx;
         mx = -1, idx = -1;
         for (int i = 2; i <= n; i++) {
@@ -38,3 +39,10 @@ int main() {
         guess(a, idx);
     }
 }
+
+/*
+0 2 4 6 8
+
+2,4
+
+*/
