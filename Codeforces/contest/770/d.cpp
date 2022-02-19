@@ -17,32 +17,47 @@ int main() {
         int n;
         cin >> n;
 
-        int mx = -1, idx = -1;
+        int mx1 = -1, idx = -1, cnt1 = 0;
         for (int i = 3; i <= n; i++) {
             int res = ask(1, 2, i);
-            if (res > mx) {
-                mx = res;
+            if (res > mx1) {
+                mx1 = res;
                 idx = i;
-            }
+                cnt1 = 1;
+            } else if (res == mx1)
+                cnt1++;
         }
 
         int a = idx;
-        mx = -1, idx = -1;
+        int mx2 = -1, cnt2 = 0;
         for (int i = 2; i <= n; i++) {
             if (i == a) continue;
             int res = ask(1, a, i);
-            if (res > mx) {
-                mx = res;
+            if (res > mx2) {
+                mx2 = res;
                 idx = i;
-            }
+                cnt2 = 1;
+            } else if (res == mx2)
+                cnt2++;
         }
-        guess(a, idx);
+        if (mx2 > mx1)
+            guess(a, idx);
+        else if (cnt1 == n - 2)
+            guess(1, 2);
+        else if (cnt2 == n - 2)
+            guess(1, a);
+        else
+            guess(2, a);
+        assert(mx2 >= mx1);
     }
 }
 
 /*
-0 2 4 6 8
+Suppose:
+max(a1,a2,ak) = T
+max(a1,ak,ai) = M
 
-2,4
+if a1 <= ak <= a2, then the answer is between a1 and a2.
+else the anwser may be (ak, ai), (a1, ak) or (a2, ak).
 
 */
