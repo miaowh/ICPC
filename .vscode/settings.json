@@ -4,6 +4,7 @@
         "vector": "cpp",
         "bitset": "cpp",
         "*.tcc": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "valarray": "cpp"
     }
 }

@@ -1,71 +1,129 @@
 #include <bits/stdc++.h>
 using namespace std;
-const int maxn = 1e6;
 
-struct DLX {
-    int L[maxn], R[maxn], U[maxn], D[maxn];
-    int col[maxn], row[maxn];
-    int sz[maxn], rowPtr[maxn], idx;
-    int maxDep, stk[maxn];
-    int ans;
+string a[10], b[10];
 
-    void remove(int c) {
-        // remove the c-th column and corresponding rows
-        L[R[c]] = L[c];
-        R[L[c]] = R[c];
-        for (int i = D[c]; i != c; i = D[i])
-            for (int j = R[i]; j != i; j = R[j])
-                U[D[j]] = U[j], D[U[j]] = D[j], --sz[col[j]];
+using pii = pair<int, int>;
+vector<pii> kills;
+
+bool vis[10][10];
+int dx[] = {-1, 0, 0, 1};
+int dy[] = {0, 1, -1, 0};
+int bIdx[10];
+
+int tot = 0;
+void dfs(int x, int y) {
+    tot++;
+    vis[x][y] = 1;
+    for (int i = 0; i < 4; i++) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+        if (nx < 0 || ny < 0 || nx > 7 || ny > 7 || vis[nx][ny] ||
+            a[x][y] != a[nx][ny])
+            continue;
+        dfs(nx, ny);
     }
+}
+int work(int x, int y, char op) {
+    tot = 0;
+    memset(vis, 0, sizeof(vis));
+    dfs(x, y);
+    int ret = tot;
 
-    void recover(int c) {
-        // recover the c-th column and corresponding rows
-        for (int i = U[c]; i != c; i = U[i])
-            for (int j = L[i]; j != i; j = L[j])
-                U[D[j]] = D[U[j]] = j, ++sz[col[j]];
-        L[R[c]] = R[L[c]] = c;
-    }
-
-    void build(int m) {
-        // 0 is a head node. column counts from 1. row can count from 0.
-        for (int i = 0; i <= m; i++) {
-            L[i] = i - 1, R[i] = i + 1;
-            U[i] = D[i] = i;
+    if (op == 'w') {
+        for (int j = 0; j < 8; j++) {
+            int k = 0;
+            for (int i = 0; i < 8; i++) {
+                if (!vis[i][j]) a[k++][j] = a[i][j];
+            }
+            for (; k < 8; k++) {
+                a[k][j] = b[j][bIdx[j]++];
+            }
         }
-        L[0] = m, R[m] = 0, idx = m;
-        memset(sz, 0, sizeof(sz));
-        memset(rowPtr, 0, sizeof(rowPtr));
-    }
-
-    void insert(int r, int c) {
-        // insert an element in r-th row, c-th column
-        row[++idx] = r, col[idx] = c, ++sz[c];
-        U[idx] = c, D[idx] = D[c], U[D[c]] = idx, D[c] = idx;
-        if (!rowPtr[r])
-            rowPtr[r] = L[idx] = R[idx] = idx;
-        else {
-            int x = rowPtr[r];
-            L[idx] = x, R[idx] = R[x];
-            L[R[x]] = idx, R[x] = idx;
+    } else if (op == 'd') {
+        for (int j = 0; j < 8; j++) {
+            int k = 7;
+            for (int i = 7; i >= 0; i--) {
+                if (!vis[i][j]) a[k++][j] = a[i][j];
+            }
+            for (; k >= 0; k--) {
+                a[k][j] = b[j][bIdx[j]++];
+            }
+        }
+    } else if (op == 'a') {
+        for (int i = 0; i < 8; i++) {
+            int k = 0;
+            for (int j = 0; j < 8; j++) {
+                if (!vis[i][j]) a[i][k++] = a[i][j];
+            }
+            for (; k < 8; k++) {
+                a[i][k] = b[i][bIdx[i]++];
+            }
+        }
+    } else {
+        for (int i = 0; i < 8; i++) {
+            int k = 7;
+            for (int j = 7; j >= 0; j--) {
+                if (!vis[i][j]) a[i][k++] = a[i][j];
+            }
+            for (; k >= 0; k--) {
+                a[i][k] = b[i][bIdx[i]++];
+            }
         }
     }
 
-    bool dance(int dep) {
-        if (!R[0]) {
-            maxDep = dep;
-            return true;
-        }
-        int c = R[0];
-        for (int i = R[0]; i; i = R[i])
-            if (sz[i] < sz[c]) c = i;
-        remove(c);
-        for (int i = D[c]; i != c; i = D[i]) {
-            stk[dep] = row[i];
-            for (int j = R[i]; j != i; j = R[j]) remove(col[j]);
-            if (dance(dep + 1)) return true;
-            for (int j = L[i]; j != i; j = L[j]) recover(col[j]);
-        }
-        recover(c);
-        return false;
+    return ret;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    for (int i = 0; i < 8; i++) cin >> a[i];
+    for (int i = 0; i < 8; i++) cin >> b[i];
+    char op;
+    for (int i = 0, x, y; i < n; i++) {
+        cin >> x >> y >> op;
+        x--, y--;
+        cout << work(x, y, op) << '\n';
     }
-} dlx;
+}
+/*
+2
+rbbbrrrb
+ggggbrbr
+rrrggbrr
+gbrgbrrr
+bgbgrrrg
+bgbgbrrb
+rggrgggg
+bgbrgrgr
+bbrgggggbbgbbbrg
+bbgbrgbgbbgbbbrg
+brgbgbbggbbgbbbr
+gbbgbbbrggrbbgrb
+bgrbbrgggrbrgbrr
+brgbrgbrgrgbrgbr
+brbbrbbbrbrrggrg
+ggrbrgbgbrgggrbr
+1 5 w
+1 4 d
+
+
+rbbb   b
+ggggb br
+rrrggbrr
+gbrgbrrr
+bgbgrrrg
+bgbgbrrb
+rggrgggg
+bgbrgrgr
+
+rbbbb b b
+ggggb br
+rrrggbrr
+gbrgbrrr
+bgbgrrrg
+bgbgbrrb
+rggrgggg
+bgbrgrgr
+*/
